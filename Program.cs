@@ -11,6 +11,7 @@ builder.Services.AddRazorComponents()
 
 // Register your new service
 builder.Services.AddScoped<DatabaseConnexionService>();
+builder.Services.AddScoped<ExamService>();
 //builds the app into the app varable 
 var app = builder.Build();
 
