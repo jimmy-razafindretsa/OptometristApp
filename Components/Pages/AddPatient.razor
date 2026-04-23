@@ -1,0 +1,248 @@
+@page "/add-patient"
+@using OptometristApp.Data
+@using OptometristApp.Data.Models
+@using System.ComponentModel.DataAnnotations
+@inject ExamService ExamService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Add Patient</PageTitle>
+
+<h1>Add a New Patient</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <EditForm Model="@_patientModel" OnValidSubmit="HandleValidSubmit" FormName="AddPatientForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="id" class="form-label">Patient ID (Unique)</label>
+                    <InputNumber id="id" @bind-Value="_patientModel.Id" class="form-control" />
+                    <ValidationMessage For="@(() => _patientModel.Id)" class="text-danger" />
+                </div>
+                <div class="col-md-4">
+                    <label for="prenom" class="form-label">First Name</label>
+                    <InputText id="prenom" @bind-Value="_patientModel.Prenom" class="form-control" />
+                    <ValidationMessage For="@(() => _patientModel.Prenom)" class="text-danger" />
+                </div>
+                <div class="col-md-4">
+                    <label for="nom" class="form-label">Last Name</label>
+                    <InputText id="nom" @bind-Value="_patientModel.Nom" class="form-control" />
+                    <ValidationMessage For="@(() => _patientModel.Nom)" class="text-danger" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="sexe" class="form-label">Sex</label>
+                    <InputSelect id="sexe" @bind-Value="_patientModel.Sexe" class="form-select">
+                        <option value="">-- Select Sex --</option>
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                        <option value="Autre">Autre</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-4">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <InputDate id="dob" @bind-Value="_patientModel.DateNaissance" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label for="langue" class="form-label">Language</label>
+                    <InputText id="langue" @bind-Value="_patientModel.Langue" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email</label>
+                    <InputText id="email" @bind-Value="_patientModel.Courriel" class="form-control" />
+                    <ValidationMessage For="@(() => _patientModel.Courriel)" class="text-danger" />
+                </div>
+                <div class="col-md-6">
+                    <label for="prof" class="form-label">Profession</label>
+                    <InputText id="prof" @bind-Value="_patientModel.Profession" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <label for="rue" class="form-label">Street Address</label>
+                    <InputText id="rue" @bind-Value="_patientModel.AdresseRue" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label for="appart" class="form-label">Apartment</label>
+                    <InputText id="appart" @bind-Value="_patientModel.AdresseAppart" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="cp" class="form-label">Postal Code</label>
+                    <InputText id="cp" @bind-Value="_patientModel.CodePostal" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label for="ramq" class="form-label">RAMQ Expiry Date</label>
+                    <InputDate id="ramq" @bind-Value="_patientModel.RamqDateExp" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label for="dossier" class="form-label">Dossier No</label>
+                    <InputNumber id="dossier" @bind-Value="_patientModel.DossierNo" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="doctor" class="form-label">Doctor</label>
+                    <InputSelect id="doctor" @bind-Value="_patientModel.DocteurId" class="form-select">
+                        <option value="">-- Select Doctor --</option>
+                        @if (_doctors != null)
+                        {
+                            @foreach (var d in _doctors)
+                            {
+                                <option value="@d.Id">@d.NomComplet</option>
+                            }
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-6">
+                    <label for="city" class="form-label">City</label>
+                    <InputSelect id="city" @bind-Value="_patientModel.VilleId" class="form-select">
+                        <option value="">-- Select City --</option>
+                        @if (_cities != null)
+                        {
+                            @foreach (var c in _cities)
+                            {
+                                <option value="@c.Id">@c.Nom (@c.Province)</option>
+                            }
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <InputCheckbox id="rappel" @bind-Value="_patientModel.NePasRappeler" class="form-check-input" />
+                    <label class="form-check-label" for="rappel">Do not recall</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="decede" @bind-Value="_patientModel.EstDecede" class="form-check-input" />
+                    <label class="form-check-label" for="decede">Deceased</label>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger">@_errorMessage</div>
+            }
+
+            <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                @if (_isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span> Saving...</span>
+                }
+                else
+                {
+                    <span>Save Patient</span>
+                }
+            </button>
+            <a href="/" class="btn btn-secondary">Cancel</a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private PatientFormModel _patientModel { get; set; } = new();
+    private List<Doctor>? _doctors;
+    private List<City>? _cities;
+    private string? _errorMessage;
+    private bool _isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _doctors = await ExamService.GetDoctorsAsync();
+            _cities = await ExamService.GetCitiesAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading data: {ex.Message}";
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        _isSubmitting = true;
+        _errorMessage = null;
+
+        try
+        {
+            var patient = new Patient
+            {
+                Id = _patientModel.Id,
+                Prenom = _patientModel.Prenom,
+                Nom = _patientModel.Nom,
+                Sexe = _patientModel.Sexe,
+                DateNaissance = _patientModel.DateNaissance,
+                Langue = _patientModel.Langue,
+                Courriel = _patientModel.Courriel,
+                AdresseRue = _patientModel.AdresseRue,
+                AdresseAppart = _patientModel.AdresseAppart,
+                CodePostal = _patientModel.CodePostal,
+                RamqDateExp = _patientModel.RamqDateExp,
+                DossierNo = _patientModel.DossierNo,
+                Profession = _patientModel.Profession,
+                NePasRappeler = _patientModel.NePasRappeler,
+                EstDecede = _patientModel.EstDecede,
+                DocteurId = _patientModel.DocteurId,
+                VilleId = _patientModel.VilleId
+            };
+
+            await ExamService.AddPatientAsync(patient);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error saving patient: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    public class PatientFormModel
+    {
+        [Required(ErrorMessage = "ID is required.")]
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "First name is required.")]
+        public string Prenom { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Last name is required.")]
+        public string Nom { get; set; } = string.Empty;
+
+        public string? Sexe { get; set; }
+        public DateTime? DateNaissance { get; set; }
+        
+        [Required(ErrorMessage = "Language is required.")]
+        public string Langue { get; set; } = "Français";
+
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        public string? Courriel { get; set; }
+
+        public string? AdresseRue { get; set; }
+        public string? AdresseAppart { get; set; }
+        public string? CodePostal { get; set; }
+        public DateTime? RamqDateExp { get; set; }
+        public int? DossierNo { get; set; }
+        public string? Profession { get; set; }
+        public bool NePasRappeler { get; set; } = false;
+        public bool EstDecede { get; set; } = false;
+        public int? DocteurId { get; set; }
+        public int? VilleId { get; set; }
+    }
+}

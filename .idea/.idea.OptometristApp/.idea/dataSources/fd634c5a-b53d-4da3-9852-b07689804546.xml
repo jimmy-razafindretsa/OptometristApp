@@ -11,9 +11,8 @@
 4||10|c|G
 4||10|C|G
 4||10|T|G</Grants>
-      <IntrospectionStateNumber>751</IntrospectionStateNumber>
       <ServerVersion>15.15</ServerVersion>
-      <StartupTime>1776962312</StartupTime>
+      <StartupTime>1776965067</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -707,7 +706,6 @@ true posixrules
 13273||10|C|G
 13273||-9223372036854775808|U|G
 13273||10|U|G</Grants>
-      <IntrospectionStateNumber>751</IntrospectionStateNumber>
       <ObjectId>16384</ObjectId>
       <OwnerName>jimmyrazafindretsa</OwnerName>
     </database>
@@ -4126,9 +4124,6 @@ true posixrules
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <LastIntrospectionL1Xid>751</LastIntrospectionL1Xid>
-      <LastIntrospectionL2Xid>751</LastIntrospectionL2Xid>
-      <LastIntrospectionL3Xid>751</LastIntrospectionL3Xid>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
       <LastIntrospectionLocalTimestamp>2026-04-23.16:45:30</LastIntrospectionLocalTimestamp>
       <LastIntrospectionVersion>260210</LastIntrospectionVersion>
