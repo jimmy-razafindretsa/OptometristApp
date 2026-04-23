@@ -15,12 +15,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61b6f8c7-fc0f-421c-a915-4a19952ca441" name="Changes" comment="feat : docker services implemented">
-      <change afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OptometristApp.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OptometristApp.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OptometristApp.sln" beforeDir="false" afterPath="$PROJECT_DIR$/OptometristApp.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Properties/launchSettings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -192,7 +189,7 @@
       <updated>1775076157176</updated>
       <workItem from="1775076158955" duration="1629000" />
       <workItem from="1775677479242" duration="5017000" />
-      <workItem from="1776900079240" duration="3276000" />
+      <workItem from="1776900079240" duration="4109000" />
     </task>
     <servers />
   </component>
