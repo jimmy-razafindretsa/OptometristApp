@@ -18,6 +18,9 @@
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+    volumes:
+          # This maps your local folder to the Postgres auto-run folder
+      - ./sql:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     

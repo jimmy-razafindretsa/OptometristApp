@@ -15,10 +15,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61b6f8c7-fc0f-421c-a915-4a19952ca441" name="Changes" comment="feat : docker services implemented">
+      <change afterPath="$PROJECT_DIR$/sql/init.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Components/Pages/Home.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/Home.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/DatabaseConnexionService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Data/DatabaseConnexionService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/compose.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -194,7 +192,8 @@
       <updated>1775076157176</updated>
       <workItem from="1775076158955" duration="1629000" />
       <workItem from="1775677479242" duration="5017000" />
-      <workItem from="1776900079240" duration="7307000" />
+      <workItem from="1776900079240" duration="9570000" />
+      <workItem from="1776961835228" duration="387000" />
     </task>
     <servers />
   </component>
