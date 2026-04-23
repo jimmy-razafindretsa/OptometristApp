@@ -1,7 +1,27 @@
 ﻿@page "/"
+@using OptometristApp.Data
+@inject DatabaseConnexionService DbService
 
-<PageTitle>Home</PageTitle>
+<h1>Optometrist App Status</h1>
 
-<h1>Hello, world!</h1>
+@if (_dbStatus == null)
+{
+    <p><em>Checking database connection...</em></p>
+}
+else
+{
+    <div class="alert @(_dbStatus == "Online" ? "alert-success" : "alert-danger")">
+        Database is: <strong>@_dbStatus</strong>
+    </div>
+}
 
-Welcome to your new app.
+@code {
+    private string? _dbStatus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Call our async test method
+        var isAlive = await DbService.IsConnectionHealthy();
+        _dbStatus = isAlive ? "Online" : "Offline";
+    }
+}

@@ -5,13 +5,32 @@ namespace OptometristApp.Data;
 public class DatabaseConnexionService
 {
     private readonly string _connectionString;
+    private readonly NpgsqlDataSource _dataSource;
+
     public DatabaseConnexionService(IConfiguration config)
     {
         _connectionString = config.GetConnectionString("DefaultConnection");
         
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(_connectionString);
-        var dataSource = dataSourceBuilder.Build();
+        // We create the DataSource once here. It handles the "Pooling" (efficiency).
+        _dataSource = NpgsqlDataSource.Create(_connectionString);
+    }
 
-        var conn =  dataSource.OpenConnectionAsync();
+    // This is our test method
+    public async Task<bool> IsConnectionHealthy()
+    {
+        try 
+        {
+            // 'await using' ensures the connection is closed automatically when done
+            await using var conn = await _dataSource.OpenConnectionAsync();
+            
+            // If we get here, it worked!
+            return true; 
+        }
+        catch (Exception ex)
+        {
+            // If the DB is down or credentials are wrong, it fails here
+            Console.WriteLine($"Database connection failed: {ex.Message}");
+            return false;
+        }
     }
 }

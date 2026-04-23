@@ -1,4 +1,5 @@
 using OptometristApp.Components;
+using OptometristApp.Data;
 
 //builds the app with default configuration 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 //allows the razor components to be added gracefully 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Register your new service
+builder.Services.AddScoped<DatabaseConnexionService>();
 //builds the app into the app varable 
 var app = builder.Build();
 
