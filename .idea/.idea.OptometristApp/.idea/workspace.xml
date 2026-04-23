@@ -15,9 +15,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61b6f8c7-fc0f-421c-a915-4a19952ca441" name="Changes" comment="feat : docker services implemented">
+      <change afterPath="$PROJECT_DIR$/Data/DatabaseConnexionService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Properties/launchSettings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,6 +42,9 @@
     &quot;accountId&quot;: &quot;bd0add01-52e8-4be0-8b4c-6a96e37960f5&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Data/DatabaseConnexionService.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -189,7 +191,7 @@
       <updated>1775076157176</updated>
       <workItem from="1775076158955" duration="1629000" />
       <workItem from="1775677479242" duration="5017000" />
-      <workItem from="1776900079240" duration="4109000" />
+      <workItem from="1776900079240" duration="4821000" />
     </task>
     <servers />
   </component>
