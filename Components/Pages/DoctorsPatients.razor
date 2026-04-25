@@ -1,0 +1,551 @@
+@page "/doctors-patients"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject PatientService PatientService
+@inject DoctorService DoctorService
+@inject LocationService LocationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Manage Doctors & Patients</PageTitle>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary"><i class="bi bi-people-fill me-2"></i>Doctors & Patients</h1>
+    </div>
+
+    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link @(_activeTab == "patients" ? "active" : "")" @onclick='() => _activeTab = "patients"'>
+                <i class="bi bi-person-lines-fill me-1"></i> Patients
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link @(_activeTab == "doctors" ? "active" : "")" @onclick='() => _activeTab = "doctors"'>
+                <i class="bi bi-person-badge-fill me-1"></i> Doctors
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        @if (_activeTab == "patients")
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Patients</h3>
+                <button class="btn btn-success" @onclick="() => ShowPatientForm()">
+                    <i class="bi bi-person-plus me-1"></i> Add Patient
+                </button>
+            </div>
+
+            @if (_patients == null)
+            {
+                <div class="text-center my-5"><div class="spinner-border text-success"></div></div>
+            }
+            else
+            {
+                <div class="card shadow-sm border-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Profession</th>
+                                    <th>City</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in _patients)
+                                {
+                                    <tr>
+                                        <td>@p.Id</td>
+                                        <td><strong>@p.FullName</strong></td>
+                                        <td>@p.Profession</td>
+                                        <td>@GetCityName(p.VilleId)</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => ShowPatientForm(p)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDeletePatient(p)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Doctors</h3>
+                <button class="btn btn-info text-white" @onclick="() => ShowDoctorForm()">
+                    <i class="bi bi-person-plus-fill me-1"></i> Add Doctor
+                </button>
+            </div>
+
+            @if (_doctors == null)
+            {
+                <div class="text-center my-5"><div class="spinner-border text-info"></div></div>
+            }
+            else
+            {
+                <div class="card shadow-sm border-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Licence</th>
+                                    <th>Name</th>
+                                    <th>Clinic</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var d in _doctors)
+                                {
+                                    <tr>
+                                        <td><code>@d.Licence</code></td>
+                                        <td><strong>@d.NomComplet</strong></td>
+                                        <td>@d.CliniqueName</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => ShowDoctorForm(d)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDeleteDoctor(d)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@* Patient Modal *@
+@if (_showPatientForm)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); overflow-y: auto;">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-person-fill me-2"></i>@(_isEditingPatient ? "Edit Patient" : "New Patient")</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => _showPatientForm = false"></button>
+                </div>
+                <EditForm Model="@_patientModel" OnValidSubmit="SavePatient">
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Patient ID (Unique)</label>
+                                <InputNumber @bind-Value="_patientModel.Id" class="form-control" disabled="@_isEditingPatient" />
+                                <ValidationMessage For="@(() => _patientModel.Id)" class="text-danger" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">First Name</label>
+                                <InputText @bind-Value="_patientModel.Prenom" class="form-control" />
+                                <ValidationMessage For="@(() => _patientModel.Prenom)" class="text-danger" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Last Name</label>
+                                <InputText @bind-Value="_patientModel.Nom" class="form-control" />
+                                <ValidationMessage For="@(() => _patientModel.Nom)" class="text-danger" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Gender</label>
+                                <InputSelect @bind-Value="_patientModel.Sexe" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="Homme">Homme</option>
+                                    <option value="Femme">Femme</option>
+                                    <option value="Autre">Autre</option>
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Date of Birth</label>
+                                <InputDate @bind-Value="_patientModel.DateNaissance" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Language</label>
+                                <InputText @bind-Value="_patientModel.Langue" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <InputText @bind-Value="_patientModel.Courriel" class="form-control" placeholder="example@mail.com" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Profession</label>
+                                <InputText @bind-Value="_patientModel.Profession" class="form-control" />
+                            </div>
+
+                            <div class="col-md-8">
+                                <label class="form-label">Street Address</label>
+                                <InputText @bind-Value="_patientModel.AdresseRue" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Appart</label>
+                                <InputText @bind-Value="_patientModel.AdresseAppart" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Postal Code</label>
+                                <InputText @bind-Value="_patientModel.CodePostal" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">City</label>
+                                <InputSelect @bind-Value="_patientModel.VilleId" class="form-select">
+                                    <option value="">-- Select City --</option>
+                                    @if (_cities != null)
+                                    {
+                                        @foreach (var c in _cities)
+                                        {
+                                            <option value="@c.Id">@c.Nom (@c.Province)</option>
+                                        }
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">RAMQ Expire Date</label>
+                                <InputDate @bind-Value="_patientModel.RamqDateExp" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Referring Doctor</label>
+                                <InputSelect @bind-Value="_patientModel.DocteurId" class="form-select">
+                                    <option value="">-- Select Doctor --</option>
+                                    @if (_doctors != null)
+                                    {
+                                        @foreach (var d in _doctors)
+                                        {
+                                            <option value="@d.Id">@d.NomComplet</option>
+                                        }
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">File No.</label>
+                                <InputNumber @bind-Value="_patientModel.DossierNo" class="form-control" />
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-check-inline">
+                                    <InputCheckbox @bind-Value="_patientModel.NePasRappeler" class="form-check-input" id="checkRappel" />
+                                    <label class="form-check-label" for="checkRappel">Do Not Call</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <InputCheckbox @bind-Value="_patientModel.EstDecede" class="form-check-input" id="checkDecede" />
+                                    <label class="form-check-label" for="checkDecede">Deceased</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(_errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3">@_errorMessage</div>
+                        }
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" @onclick="() => _showPatientForm = false">Cancel</button>
+                        <button type="submit" class="btn btn-success" disabled="@_isSubmitting">
+                            @if (_isSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                            Save Patient
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@* Doctor Modal *@
+@if (_showDoctorForm)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="bi bi-person-badge me-2"></i>@(_isEditingDoctor ? "Edit Doctor" : "New Doctor")</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => _showDoctorForm = false"></button>
+                </div>
+                <EditForm Model="@_doctorModel" OnValidSubmit="SaveDoctor">
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Licence Number</label>
+                            <InputText @bind-Value="_doctorModel.Licence" class="form-control" />
+                            <ValidationMessage For="@(() => _doctorModel.Licence)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <InputText @bind-Value="_doctorModel.NomComplet" class="form-control" />
+                            <ValidationMessage For="@(() => _doctorModel.NomComplet)" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Clinic</label>
+                            <InputSelect @bind-Value="_doctorModel.CliniqueId" class="form-select">
+                                <option value="">-- Select Clinic --</option>
+                                @if (_cliniques != null)
+                                {
+                                    @foreach (var c in _cliniques)
+                                    {
+                                        <option value="@c.Id">@c.Nom</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(_errorMessage))
+                        {
+                            <div class="alert alert-danger">@_errorMessage</div>
+                        }
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" @onclick="() => _showDoctorForm = false">Cancel</button>
+                        <button type="submit" class="btn btn-info text-white" disabled="@_isSubmitting">
+                            @if (_isSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                            Save Doctor
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@* Delete Confirmation Modal *@
+@if (_showDeleteConfirm)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => _showDeleteConfirm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete @(_itemToDeleteType == "patient" ? "patient" : "doctor") <strong>@_itemToDeleteName</strong>?</p>
+                    <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showDeleteConfirm = false">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteConfirmed" disabled="@_isSubmitting">
+                        @if (_isSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string _activeTab = "patients";
+    private List<Patient>? _patients;
+    private List<Doctor>? _doctors;
+    private List<City>? _cities;
+    private List<Clinique>? _cliniques;
+
+    private bool _showPatientForm = false;
+    private bool _showDoctorForm = false;
+    private bool _showDeleteConfirm = false;
+    private bool _isSubmitting = false;
+    private string? _errorMessage;
+
+    private PatientFormModel _patientModel = new();
+    private bool _isEditingPatient = false;
+    
+    private DoctorFormModel _doctorModel = new();
+    private bool _isEditingDoctor = false;
+    private int _editingDoctorId;
+
+    private string? _itemToDeleteType;
+    private int _itemToDeleteId;
+    private string? _itemToDeleteName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllData();
+    }
+
+    private async Task LoadAllData()
+    {
+        try {
+            _patients = await PatientService.GetPatientsAsync();
+            _doctors = await DoctorService.GetDoctorsAsync();
+            _cities = await LocationService.GetCitiesAsync();
+            _cliniques = await LocationService.GetCliniquesAsync();
+        } catch (Exception ex) {
+            _errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private string GetCityName(int? id) => _cities?.FirstOrDefault(c => c.Id == id)?.Nom ?? "Unknown";
+
+    #region Patient Logic
+
+    private void ShowPatientForm(Patient? p = null)
+    {
+        _errorMessage = null;
+        if (p == null)
+        {
+            _patientModel = new PatientFormModel();
+            _isEditingPatient = false;
+        }
+        else
+        {
+            _patientModel = new PatientFormModel
+            {
+                Id = p.Id, Prenom = p.Prenom, Nom = p.Nom, Sexe = p.Sexe,
+                DateNaissance = p.DateNaissance, Langue = p.Langue, Courriel = p.Courriel,
+                AdresseRue = p.AdresseRue, AdresseAppart = p.AdresseAppart, CodePostal = p.CodePostal,
+                RamqDateExp = p.RamqDateExp, DossierNo = p.DossierNo, Profession = p.Profession,
+                NePasRappeler = p.NePasRappeler, EstDecede = p.EstDecede, DocteurId = p.DocteurId, VilleId = p.VilleId
+            };
+            _isEditingPatient = true;
+        }
+        _showPatientForm = true;
+    }
+
+    private async Task SavePatient()
+    {
+        _isSubmitting = true;
+        _errorMessage = null;
+        try {
+            var p = new Patient {
+                Id = _patientModel.Id, Prenom = _patientModel.Prenom, Nom = _patientModel.Nom,
+                Sexe = _patientModel.Sexe, DateNaissance = _patientModel.DateNaissance,
+                Langue = _patientModel.Langue, Courriel = _patientModel.Courriel,
+                AdresseRue = _patientModel.AdresseRue, AdresseAppart = _patientModel.AdresseAppart,
+                CodePostal = _patientModel.CodePostal, RamqDateExp = _patientModel.RamqDateExp,
+                DossierNo = _patientModel.DossierNo, Profession = _patientModel.Profession,
+                NePasRappeler = _patientModel.NePasRappeler, EstDecede = _patientModel.EstDecede,
+                DocteurId = _patientModel.DocteurId, VilleId = _patientModel.VilleId
+            };
+
+            if (_isEditingPatient) await PatientService.UpdatePatientAsync(p);
+            else await PatientService.AddPatientAsync(p);
+
+            await LoadAllData();
+            _showPatientForm = false;
+        } catch (Exception ex) {
+            _errorMessage = ex.Message;
+        } finally {
+            _isSubmitting = false;
+        }
+    }
+
+    private void ConfirmDeletePatient(Patient p)
+    {
+        _itemToDeleteType = "patient";
+        _itemToDeleteId = p.Id;
+        _itemToDeleteName = p.FullName;
+        _showDeleteConfirm = true;
+    }
+
+    #endregion
+
+    #region Doctor Logic
+
+    private void ShowDoctorForm(Doctor? d = null)
+    {
+        _errorMessage = null;
+        if (d == null)
+        {
+            _doctorModel = new DoctorFormModel();
+            _isEditingDoctor = false;
+        }
+        else
+        {
+            _doctorModel = new DoctorFormModel { Licence = d.Licence, NomComplet = d.NomComplet, CliniqueId = d.CliniqueId };
+            _editingDoctorId = d.Id;
+            _isEditingDoctor = true;
+        }
+        _showDoctorForm = true;
+    }
+
+    private async Task SaveDoctor()
+    {
+        _isSubmitting = true;
+        _errorMessage = null;
+        try {
+            var d = new Doctor {
+                Id = _isEditingDoctor ? _editingDoctorId : 0,
+                Licence = _doctorModel.Licence,
+                NomComplet = _doctorModel.NomComplet,
+                CliniqueId = _doctorModel.CliniqueId
+            };
+
+            if (_isEditingDoctor) await DoctorService.UpdateDoctorAsync(d);
+            else await DoctorService.AddDoctorAsync(d);
+
+            await LoadAllData();
+            _showDoctorForm = false;
+        } catch (Exception ex) {
+            _errorMessage = ex.Message;
+        } finally {
+            _isSubmitting = false;
+        }
+    }
+
+    private void ConfirmDeleteDoctor(Doctor d)
+    {
+        _itemToDeleteType = "doctor";
+        _itemToDeleteId = d.Id;
+        _itemToDeleteName = d.NomComplet;
+        _showDeleteConfirm = true;
+    }
+
+    #endregion
+
+    private async Task DeleteConfirmed()
+    {
+        _isSubmitting = true;
+        try {
+            if (_itemToDeleteType == "patient") await PatientService.DeletePatientAsync(_itemToDeleteId);
+            else await DoctorService.DeleteDoctorAsync(_itemToDeleteId);
+            await LoadAllData();
+            _showDeleteConfirm = false;
+        } catch (Exception ex) {
+            _errorMessage = ex.Message;
+        } finally {
+            _isSubmitting = false;
+        }
+    }
+
+    public class PatientFormModel
+    {
+        [Required] [Range(1, int.MaxValue)] public int Id { get; set; }
+        [Required] [StringLength(100)] public string Prenom { get; set; } = "";
+        [Required] [StringLength(100)] public string Nom { get; set; } = "";
+        public string? Sexe { get; set; }
+        public DateTime? DateNaissance { get; set; }
+        [Required] [StringLength(50)] public string Langue { get; set; } = "Français";
+        [EmailAddress] [StringLength(150)] public string? Courriel { get; set; }
+        [StringLength(200)] public string? AdresseRue { get; set; }
+        [StringLength(50)] public string? AdresseAppart { get; set; }
+        [StringLength(20)] public string? CodePostal { get; set; }
+        public DateTime? RamqDateExp { get; set; }
+        public int? DossierNo { get; set; }
+        [StringLength(150)] public string? Profession { get; set; }
+        public bool NePasRappeler { get; set; }
+        public bool EstDecede { get; set; }
+        public int? DocteurId { get; set; }
+        public int? VilleId { get; set; }
+    }
+
+    public class DoctorFormModel
+    {
+        [Required] [StringLength(50)] public string Licence { get; set; } = "";
+        [Required] [StringLength(150)] public string NomComplet { get; set; } = "";
+        public int? CliniqueId { get; set; }
+    }
+}

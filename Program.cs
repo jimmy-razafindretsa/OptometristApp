@@ -1,5 +1,6 @@
 using OptometristApp.Components;
 using OptometristApp.Data;
+using Npgsql;
 
 //builds the app with default configuration 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +11,14 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Register your new service
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton(NpgsqlDataSource.Create(connectionString));
+
 builder.Services.AddScoped<DatabaseConnexionService>();
+builder.Services.AddScoped<PatientService>();
+builder.Services.AddScoped<DoctorService>();
 builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<LocationService>();
 //builds the app into the app varable 
 var app = builder.Build();
 

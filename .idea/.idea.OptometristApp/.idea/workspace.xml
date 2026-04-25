@@ -15,11 +15,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61b6f8c7-fc0f-421c-a915-4a19952ca441" name="Changes" comment="feat : docker services implemented">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/fd634c5a-b53d-4da3-9852-b07689804546.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/fd634c5a-b53d-4da3-9852-b07689804546.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/6b69b3e6-62cf-476d-ab7f-2f84a1fa4bc2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/6b69b3e6-62cf-476d-ab7f-2f84a1fa4bc2/storage_v2/_src_/database/postgres.edMnLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/6b69b3e6-62cf-476d-ab7f-2f84a1fa4bc2/storage_v2/_src_/database/postgres.edMnLQ/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/6b69b3e6-62cf-476d-ab7f-2f84a1fa4bc2/storage_v2/_src_/database/postgres.edMnLQ/schema/pg_catalog.0S1ZNQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/dataSources/6b69b3e6-62cf-476d-ab7f-2f84a1fa4bc2/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OptometristApp/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/App.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/App.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/AddExam.razor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/AddPatient.razor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/Counter.razor" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Components/Pages/Home.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/Home.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/Weather.razor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/_Imports.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data/DatabaseConnexionService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Data/DatabaseConnexionService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Data/ExamService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Data/ExamService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Data/Models/Models.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Data/Models/Models.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +40,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="2" />
+    <option name="cachedIndexableFilesCount" value="3" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -195,7 +208,8 @@
       <workItem from="1775076158955" duration="1629000" />
       <workItem from="1775677479242" duration="5017000" />
       <workItem from="1776900079240" duration="9570000" />
-      <workItem from="1776961835228" duration="3363000" />
+      <workItem from="1776961835228" duration="4617000" />
+      <workItem from="1776990138138" duration="4465000" />
     </task>
     <servers />
   </component>

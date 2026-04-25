@@ -29,6 +29,15 @@ public class Doctor
     public int Id { get; set; }
     public string Licence { get; set; } = string.Empty;
     public string NomComplet { get; set; } = string.Empty;
+    public int? CliniqueId { get; set; }
+    public string? CliniqueName { get; set; }
+}
+
+public class Clinique
+{
+    public int Id { get; set; }
+    public string Nom { get; set; } = string.Empty;
+    public int? VilleId { get; set; }
 }
 
 public class City
@@ -50,4 +59,7 @@ public class Exam
     public int PatientId { get; set; }
     public int ExamTypeId { get; set; }
     public DateTime DateExamen { get; set; } = DateTime.Today;
+    
+    public string? PatientName { get; set; }
+    public string? ExamTypeName { get; set; }
 }

@@ -1,24 +1,70 @@
 ﻿@page "/"
-@using OptometristApp.Data
 @inject DatabaseConnexionService DbService
 
-<h1>Optometrist App Status</h1>
+<PageTitle>Home</PageTitle>
 
-@if (_dbStatus == null)
-{
-    <p><em>Checking database connection...</em></p>
-}
-else
-{
-    <div class="alert @(_dbStatus == "Online" ? "alert-success" : "alert-danger")">
-        Database is: <strong>@_dbStatus</strong>
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Clinique Magoo</h1>
+        <p class="lead text-secondary">Optometrist Management System</p>
     </div>
 
-    <div class="mt-4">
-        <a href="add-exam" class="btn btn-primary btn-lg">Add New Exam</a>
-        <a href="add-patient" class="btn btn-success btn-lg ms-2">Add New Patient</a>
-    </div>
-}
+    @if (_dbStatus == null)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center g-4">
+            <div class="col-md-5">
+                <div class="card h-100 shadow-sm border-0 hover-card">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="bi bi-calendar-check text-primary" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="card-title h3 mb-3">Exams</h2>
+                        <p class="card-text text-muted mb-4">Manage patient eye exams, history, and scheduling.</p>
+                        <a href="exams" class="btn btn-primary btn-lg px-5 rounded-pill">Manage Exams</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card h-100 shadow-sm border-0 hover-card">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="bi bi-people-fill text-success" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="card-title h3 mb-3">Doctors & Patients</h2>
+                        <p class="card-text text-muted mb-4">Manage medical staff and patient records.</p>
+                        <a href="doctors-patients" class="btn btn-success btn-lg px-5 rounded-pill">Manage People</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 text-center">
+            <span class="badge rounded-pill @(_dbStatus == "Online" ? "bg-success" : "bg-danger") p-2 px-3">
+                <i class="bi @(_dbStatus == "Online" ? "bi-cloud-check" : "bi-cloud-slash") me-1"></i>
+                Database: @_dbStatus
+            </span>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+    }
+</style>
 
 @code {
     private string? _dbStatus;

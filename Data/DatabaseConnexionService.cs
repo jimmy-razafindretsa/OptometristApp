@@ -4,15 +4,11 @@ namespace OptometristApp.Data;
 
 public class DatabaseConnexionService
 {
-    private readonly string _connectionString;
     private readonly NpgsqlDataSource _dataSource;
 
-    public DatabaseConnexionService(IConfiguration config)
+    public DatabaseConnexionService(NpgsqlDataSource dataSource)
     {
-        _connectionString = config.GetConnectionString("DefaultConnection");
-        
-        // We create the DataSource once here. It handles the "Pooling" (efficiency).
-        _dataSource = NpgsqlDataSource.Create(_connectionString);
+        _dataSource = dataSource;
     }
 
     // This is our test method
