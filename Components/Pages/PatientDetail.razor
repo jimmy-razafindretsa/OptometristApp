@@ -1,0 +1,252 @@
+@page "/patient/{Id:int}"
+@using OptometristApp.Data.Models
+@using OptometristApp.Data
+@inject PatientService PatientService
+@inject NavigationManager Navigation
+
+<PageTitle>Patient Details</PageTitle>
+
+<div class="container mt-4">
+    <button class="btn btn-outline-secondary mb-3" @onclick="GoBack">
+        <i class="bi bi-arrow-left me-1"></i> Back
+    </button>
+
+    @if (_patientDetail == null)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Loading patient details...</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Main Info -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">
+                                <i class="bi bi-person-circle me-2"></i>@_patientDetail.Patient.FullName
+                            </h3>
+                            @if (_patientDetail.Patient.EstDecede)
+                            {
+                                <span class="badge bg-danger fs-6">Deceased</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">Gender</label>
+                                <p class="mb-0 fs-5">@(_patientDetail.Patient.Sexe ?? "N/A")</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">Date of Birth</label>
+                                <p class="mb-0 fs-5">@(_patientDetail.Patient.DateNaissance?.ToShortDateString() ?? "N/A")</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">Language</label>
+                                <p class="mb-0 fs-5">@_patientDetail.Patient.Langue</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">Profession</label>
+                                <p class="mb-0 fs-5">@(_patientDetail.Patient.Profession ?? "N/A")</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">RAMQ Expire Date</label>
+                                <p class="mb-0 fs-5">@(_patientDetail.Patient.RamqDateExp?.ToShortDateString() ?? "N/A")</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">File Number</label>
+                                <p class="mb-0 fs-5">@(_patientDetail.Patient.DossierNo?.ToString() ?? "N/A")</p>
+                            </div>
+                        </div>
+                        <hr />
+                        <h5 class="text-primary mb-3"><i class="bi bi-geo-alt-fill me-2"></i>Contact Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">Email</label>
+                                <p class="mb-0">
+                                    @if (!string.IsNullOrEmpty(_patientDetail.Patient.Courriel))
+                                    {
+                                        <a href="mailto:@_patientDetail.Patient.Courriel">@_patientDetail.Patient.Courriel</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted fw-bold small text-uppercase">Address</label>
+                                <p class="mb-0">
+                                    @_patientDetail.Patient.AdresseRue
+                                    @if (!string.IsNullOrEmpty(_patientDetail.Patient.AdresseAppart))
+                                    {
+                                        <span>, Apt @_patientDetail.Patient.AdresseAppart</span>
+                                    }
+                                    <br />
+                                    @if (_patientDetail.City != null)
+                                    {
+                                        <span>@_patientDetail.City.Nom, @_patientDetail.City.Province</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(_patientDetail.Patient.CodePostal))
+                                    {
+                                        <span> @_patientDetail.Patient.CodePostal</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        @if (_patientDetail.Phones.Any())
+                        {
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Phone Type</th>
+                                            <th>Number</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var phone in _patientDetail.Phones)
+                                        {
+                                            <tr>
+                                                <td><span class="badge bg-secondary">@phone.TypeTel</span></td>
+                                                <td><a href="tel:@phone.Numero">@phone.Numero</a></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Panel (Doctor & Status) -->
+            <div class="col-lg-4">
+                @if (_patientDetail.Patient.NePasRappeler)
+                {
+                    <div class="alert alert-warning shadow-sm border-0 mb-4 d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">Do Not Call</h5>
+                            <p class="mb-0 small">This patient has requested not to be contacted by phone.</p>
+                        </div>
+                    </div>
+                }
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-info text-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Referring Doctor</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (_patientDetail.Doctor != null)
+                        {
+                            <h5 class="card-title text-primary cursor-pointer" @onclick="GoToDoctor" style="cursor:pointer;">
+                                @_patientDetail.Doctor.NomComplet
+                            </h5>
+                            <p class="card-text mb-1"><strong>Licence:</strong> <code>@_patientDetail.Doctor.Licence</code></p>
+                            @if (_patientDetail.Clinique != null)
+                            {
+                                <p class="card-text mb-0"><strong>Clinic:</strong> @_patientDetail.Clinique.Nom</p>
+                            }
+                            <button class="btn btn-outline-info w-100 mt-3" @onclick="GoToDoctor">
+                                View Doctor Profile
+                            </button>
+                        }
+                        else
+                        {
+                            <p class="text-muted fst-italic mb-0">No referring doctor assigned.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exams History -->
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-calendar2-check me-2"></i>Exam History</h5>
+                        <span class="badge bg-light text-success rounded-pill px-3 py-2">@_patientDetail.Exams.Count Exams</span>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (_patientDetail.Exams.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-4">Date</th>
+                                            <th>Exam Type</th>
+                                            <th class="text-end pe-4">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var exam in _patientDetail.Exams.OrderByDescending(e => e.DateExamen))
+                                        {
+                                            var isUpcoming = exam.DateExamen > DateTime.Today;
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <strong>@exam.DateExamen.ToString("dd MMM yyyy")</strong>
+                                                    <div class="text-muted small">@exam.DateExamen.ToString("dddd")</div>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <span class="badge bg-light text-dark border">@exam.ExamTypeName</span>
+                                                </td>
+                                                <td class="text-end pe-4 align-middle">
+                                                    @if (isUpcoming)
+                                                    {
+                                                        <span class="badge bg-primary">Upcoming</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success">Completed</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-5 text-center text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                <p class="mb-0">No exams found for this patient.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PatientDetailDto? _patientDetail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _patientDetail = await PatientService.GetPatientDetailAsync(Id);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/doctors-patients");
+    }
+
+    private void GoToDoctor()
+    {
+        if (_patientDetail?.Doctor != null)
+        {
+            Navigation.NavigateTo($"/doctor/{_patientDetail.Doctor.Id}");
+        }
+    }
+}

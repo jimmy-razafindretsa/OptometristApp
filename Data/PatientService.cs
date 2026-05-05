@@ -43,14 +43,104 @@ public class PatientService
         return null;
     }
 
+    public async Task<PatientDetailDto?> GetPatientDetailAsync(int id)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        
+        await using var cmdPatient = new NpgsqlCommand(@"
+            SELECT p.*, 
+                   d.id as doc_id, d.licence, d.nom_complet as doc_nom, d.id_clinique as doc_clinique_id,
+                   c.id as clin_id, c.nom as clin_nom, c.id_ville as clin_ville_id,
+                   v.id as ville_id, v.nom as ville_nom, v.province as ville_prov
+            FROM patient p
+            LEFT JOIN docteur d ON p.id_docteur = d.id
+            LEFT JOIN clinique c ON d.id_clinique = c.id
+            LEFT JOIN ville v ON p.id_ville = v.id
+            WHERE p.id = @id", conn);
+        cmdPatient.Parameters.AddWithValue("id", id);
+        
+        PatientDetailDto? detail = null;
+        await using (var reader = await cmdPatient.ExecuteReaderAsync())
+        {
+            if (await reader.ReadAsync())
+            {
+                detail = new PatientDetailDto
+                {
+                    Patient = MapPatient(reader),
+                    Doctor = reader.IsDBNull(reader.GetOrdinal("doc_id")) ? null : new Doctor
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("doc_id")),
+                        Licence = reader.GetString(reader.GetOrdinal("licence")),
+                        NomComplet = reader.GetString(reader.GetOrdinal("doc_nom")),
+                        CliniqueId = reader.IsDBNull(reader.GetOrdinal("doc_clinique_id")) ? null : reader.GetInt32(reader.GetOrdinal("doc_clinique_id"))
+                    },
+                    Clinique = reader.IsDBNull(reader.GetOrdinal("clin_id")) ? null : new Clinique
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("clin_id")),
+                        Nom = reader.GetString(reader.GetOrdinal("clin_nom")),
+                        VilleId = reader.IsDBNull(reader.GetOrdinal("clin_ville_id")) ? null : reader.GetInt32(reader.GetOrdinal("clin_ville_id"))
+                    },
+                    City = reader.IsDBNull(reader.GetOrdinal("ville_id")) ? null : new City
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("ville_id")),
+                        Nom = reader.GetString(reader.GetOrdinal("ville_nom")),
+                        Province = reader.GetString(reader.GetOrdinal("ville_prov"))
+                    }
+                };
+            }
+        }
+
+        if (detail == null) return null;
+
+        await using var cmdPhones = new NpgsqlCommand("SELECT id, id_patient, numero, type_tel FROM telephone WHERE id_patient = @id", conn);
+        cmdPhones.Parameters.AddWithValue("id", id);
+        await using (var reader = await cmdPhones.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                detail.Phones.Add(new Phone
+                {
+                    Id = reader.GetInt32(0),
+                    PatientId = reader.GetInt32(1),
+                    Numero = reader.GetString(2),
+                    TypeTel = reader.IsDBNull(3) ? null : reader.GetString(3)
+                });
+            }
+        }
+
+        await using var cmdExams = new NpgsqlCommand(@"
+            SELECT e.id, e.id_patient, e.id_liste_examen, e.date_examen, le.nom as exam_nom 
+            FROM examen e 
+            JOIN liste_examen le ON e.id_liste_examen = le.id 
+            WHERE e.id_patient = @id 
+            ORDER BY e.date_examen DESC", conn);
+        cmdExams.Parameters.AddWithValue("id", id);
+        await using (var reader = await cmdExams.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                detail.Exams.Add(new Exam
+                {
+                    Id = reader.GetInt32(0),
+                    PatientId = reader.GetInt32(1),
+                    ExamTypeId = reader.GetInt32(2),
+                    DateExamen = reader.GetDateTime(3),
+                    ExamTypeName = reader.GetString(4)
+                });
+            }
+        }
+
+        return detail;
+    }
+
     public async Task AddPatientAsync(Patient patient)
     {
         await using var conn = await _dataSource.OpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            @"INSERT INTO patient (id, prenom, nom, sexe, date_naissance, langue, courriel, adresse_rue, adresse_appart, code_postal, ramq_date_exp, dossier_no, profession, date_creation, ne_pas_rappeler, est_decede, id_docteur, id_ville) 
-              VALUES (@id, @prenom, @nom, @sexe, @dob, @langue, @email, @rue, @appart, @cp, @ramq, @dossier, @prof, @creation, @rappel, @decede, @docId, @villeId)", conn);
+            @"INSERT INTO patient (prenom, nom, sexe, date_naissance, langue, courriel, adresse_rue, adresse_appart, code_postal, ramq_date_exp, dossier_no, profession, date_creation, ne_pas_rappeler, est_decede, id_docteur, id_ville) 
+              VALUES (@prenom, @nom, @sexe, @dob, @langue, @email, @rue, @appart, @cp, @ramq, @dossier, @prof, @creation, @rappel, @decede, @docId, @villeId)", conn);
         
-        AddPatientParameters(cmd, patient);
+        AddPatientParameters(cmd, patient, false);
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -67,7 +157,7 @@ public class PatientService
                 id_ville = @villeId 
               WHERE id = @id", conn);
         
-        AddPatientParameters(cmd, patient);
+        AddPatientParameters(cmd, patient, true);
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -104,9 +194,12 @@ public class PatientService
         };
     }
 
-    private static void AddPatientParameters(NpgsqlCommand cmd, Patient patient)
+    private static void AddPatientParameters(NpgsqlCommand cmd, Patient patient, bool includeId = true)
     {
-        cmd.Parameters.AddWithValue("id", patient.Id);
+        if (includeId)
+        {
+            cmd.Parameters.AddWithValue("id", patient.Id);
+        }
         cmd.Parameters.AddWithValue("prenom", patient.Prenom);
         cmd.Parameters.AddWithValue("nom", patient.Nom);
         cmd.Parameters.AddWithValue("sexe", (object?)patient.Sexe ?? DBNull.Value);

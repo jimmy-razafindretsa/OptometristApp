@@ -43,7 +43,7 @@ CREATE TABLE docteur (
 );
 
 CREATE TABLE patient (
-                         id INT PRIMARY KEY, -- Conserve l'ID unique provenant de l'Excel d'origine
+                         id SERIAL PRIMARY KEY, -- Conserve l'ID unique provenant de l'Excel d'origine
                          prenom VARCHAR(100) NOT NULL,
                          nom VARCHAR(100) NOT NULL,
                          sexe VARCHAR(20),
@@ -162,3 +162,6 @@ INSERT INTO examen (id_patient, id_liste_examen, date_examen) VALUES
                                                                   (246153, 1, '2023-02-15'), -- Jacky: Complet
                                                                   (246154, 6, '2023-06-01'), -- Sophie: Champ visuel
                                                                   (246155, 1, '2023-06-01'); -- Marc: Complet
+
+-- Sync the primary key sequence for the patient table since we inserted explicit IDs
+SELECT setval('patient_id_seq', COALESCE((SELECT MAX(id)+1 FROM patient), 1), false);

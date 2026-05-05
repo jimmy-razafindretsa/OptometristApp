@@ -49,24 +49,29 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
-                                    <th>Profession</th>
+                                    <th @onclick='() => SortPatients("Profession")' style="cursor: pointer;" class="user-select-none">
+                                        Profession @if(_sortColumnPatients == "Profession") { <i class="bi @(_sortAscendingPatients ? "bi-arrow-up" : "bi-arrow-down")"></i> }
+                                    </th>
                                     <th>City</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var p in _patients)
+                                @foreach (var p in SortedPatients!)
                                 {
-                                    <tr>
+                                    <tr style="cursor:pointer;" @onclick="() => GoToPatient(p.Id)">
                                         <td>@p.Id</td>
                                         <td><strong>@p.FullName</strong></td>
                                         <td>@p.Profession</td>
                                         <td>@GetCityName(p.VilleId)</td>
                                         <td class="text-end">
-                                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => ShowPatientForm(p)">
+                                            <button class="btn btn-outline-primary btn-sm me-1" @onclick="() => GoToPatient(p.Id)" @onclick:stopPropagation="true" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => ShowPatientForm(p)" @onclick:stopPropagation="true">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDeletePatient(p)">
+                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDeletePatient(p)" @onclick:stopPropagation="true">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -98,24 +103,29 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Licence</th>
+                                    <th @onclick='() => SortDoctors("Licence")' style="cursor: pointer;" class="user-select-none">
+                                        Licence @if(_sortColumnDoctors == "Licence") { <i class="bi @(_sortAscendingDoctors ? "bi-arrow-up" : "bi-arrow-down")"></i> }
+                                    </th>
                                     <th>Name</th>
                                     <th>Clinic</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var d in _doctors)
+                                @foreach (var d in SortedDoctors!)
                                 {
-                                    <tr>
+                                    <tr style="cursor:pointer;" @onclick="() => GoToDoctor(d.Id)">
                                         <td><code>@d.Licence</code></td>
                                         <td><strong>@d.NomComplet</strong></td>
                                         <td>@d.CliniqueName</td>
                                         <td class="text-end">
-                                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => ShowDoctorForm(d)">
+                                            <button class="btn btn-outline-info btn-sm me-1" @onclick="() => GoToDoctor(d.Id)" @onclick:stopPropagation="true" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => ShowDoctorForm(d)" @onclick:stopPropagation="true">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDeleteDoctor(d)">
+                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDeleteDoctor(d)" @onclick:stopPropagation="true">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -144,17 +154,12 @@
                     <div class="modal-body">
                         <DataAnnotationsValidator />
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Patient ID (Unique)</label>
-                                <InputNumber @bind-Value="_patientModel.Id" class="form-control" disabled="@_isEditingPatient" />
-                                <ValidationMessage For="@(() => _patientModel.Id)" class="text-danger" />
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">First Name</label>
                                 <InputText @bind-Value="_patientModel.Prenom" class="form-control" />
                                 <ValidationMessage For="@(() => _patientModel.Prenom)" class="text-danger" />
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Last Name</label>
                                 <InputText @bind-Value="_patientModel.Nom" class="form-control" />
                                 <ValidationMessage For="@(() => _patientModel.Nom)" class="text-danger" />
@@ -351,6 +356,57 @@
     private string _activeTab = "patients";
     private List<Patient>? _patients;
     private List<Doctor>? _doctors;
+
+    private string _sortColumnPatients = "Profession";
+    private bool _sortAscendingPatients = true;
+
+    private IEnumerable<Patient>? SortedPatients
+    {
+        get
+        {
+            if (_patients == null) return null;
+            if (_sortColumnPatients == "Profession")
+                return _sortAscendingPatients ? _patients.OrderBy(p => p.Profession) : _patients.OrderByDescending(p => p.Profession);
+            return _patients;
+        }
+    }
+
+    private void SortPatients(string column)
+    {
+        if (_sortColumnPatients == column)
+            _sortAscendingPatients = !_sortAscendingPatients;
+        else
+        {
+            _sortColumnPatients = column;
+            _sortAscendingPatients = true;
+        }
+    }
+
+    private string _sortColumnDoctors = "Licence";
+    private bool _sortAscendingDoctors = true;
+
+    private IEnumerable<Doctor>? SortedDoctors
+    {
+        get
+        {
+            if (_doctors == null) return null;
+            if (_sortColumnDoctors == "Licence")
+                return _sortAscendingDoctors ? _doctors.OrderBy(d => d.Licence) : _doctors.OrderByDescending(d => d.Licence);
+            return _doctors;
+        }
+    }
+
+    private void SortDoctors(string column)
+    {
+        if (_sortColumnDoctors == column)
+            _sortAscendingDoctors = !_sortAscendingDoctors;
+        else
+        {
+            _sortColumnDoctors = column;
+            _sortAscendingDoctors = true;
+        }
+    }
+
     private List<City>? _cities;
     private List<Clinique>? _cliniques;
 
@@ -389,6 +445,16 @@
     }
 
     private string GetCityName(int? id) => _cities?.FirstOrDefault(c => c.Id == id)?.Nom ?? "Unknown";
+
+    private void GoToPatient(int id)
+    {
+        NavigationManager.NavigateTo($"/patient/{id}");
+    }
+
+    private void GoToDoctor(int id)
+    {
+        NavigationManager.NavigateTo($"/doctor/{id}");
+    }
 
     #region Patient Logic
 
@@ -523,7 +589,7 @@
 
     public class PatientFormModel
     {
-        [Required] [Range(1, int.MaxValue)] public int Id { get; set; }
+        public int Id { get; set; }
         [Required] [StringLength(100)] public string Prenom { get; set; } = "";
         [Required] [StringLength(100)] public string Nom { get; set; } = "";
         public string? Sexe { get; set; }

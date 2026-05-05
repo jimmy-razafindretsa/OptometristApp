@@ -55,6 +55,64 @@ public class DoctorService
         return null;
     }
 
+    public async Task<DoctorDetailDto?> GetDoctorDetailAsync(int id)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        
+        await using var cmdDoc = new NpgsqlCommand(@"
+            SELECT d.*, c.id as clin_id, c.nom as clin_nom, c.id_ville as clin_ville_id
+            FROM docteur d
+            LEFT JOIN clinique c ON d.id_clinique = c.id
+            WHERE d.id = @id", conn);
+        cmdDoc.Parameters.AddWithValue("id", id);
+        
+        DoctorDetailDto? detail = null;
+        await using (var reader = await cmdDoc.ExecuteReaderAsync())
+        {
+            if (await reader.ReadAsync())
+            {
+                detail = new DoctorDetailDto
+                {
+                    Doctor = new Doctor
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("id")),
+                        Licence = reader.GetString(reader.GetOrdinal("licence")),
+                        NomComplet = reader.GetString(reader.GetOrdinal("nom_complet")),
+                        CliniqueId = reader.IsDBNull(reader.GetOrdinal("id_clinique")) ? null : reader.GetInt32(reader.GetOrdinal("id_clinique"))
+                    },
+                    Clinique = reader.IsDBNull(reader.GetOrdinal("clin_id")) ? null : new Clinique
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("clin_id")),
+                        Nom = reader.GetString(reader.GetOrdinal("clin_nom")),
+                        VilleId = reader.IsDBNull(reader.GetOrdinal("clin_ville_id")) ? null : reader.GetInt32(reader.GetOrdinal("clin_ville_id"))
+                    }
+                };
+            }
+        }
+
+        if (detail == null) return null;
+
+        await using var cmdPatients = new NpgsqlCommand("SELECT id, prenom, nom, courriel, profession, date_creation FROM patient WHERE id_docteur = @id ORDER BY nom, prenom", conn);
+        cmdPatients.Parameters.AddWithValue("id", id);
+        await using (var reader = await cmdPatients.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                detail.Patients.Add(new Patient
+                {
+                    Id = reader.GetInt32(reader.GetOrdinal("id")),
+                    Prenom = reader.GetString(reader.GetOrdinal("prenom")),
+                    Nom = reader.GetString(reader.GetOrdinal("nom")),
+                    Courriel = reader.IsDBNull(reader.GetOrdinal("courriel")) ? null : reader.GetString(reader.GetOrdinal("courriel")),
+                    Profession = reader.IsDBNull(reader.GetOrdinal("profession")) ? null : reader.GetString(reader.GetOrdinal("profession")),
+                    DateCreation = reader.GetDateTime(reader.GetOrdinal("date_creation"))
+                });
+            }
+        }
+
+        return detail;
+    }
+
     public async Task AddDoctorAsync(Doctor doctor)
     {
         await using var conn = await _dataSource.OpenConnectionAsync();

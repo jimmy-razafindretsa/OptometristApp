@@ -63,3 +63,28 @@ public class Exam
     public string? PatientName { get; set; }
     public string? ExamTypeName { get; set; }
 }
+
+public class Phone
+{
+    public int Id { get; set; }
+    public int PatientId { get; set; }
+    public string Numero { get; set; } = string.Empty;
+    public string? TypeTel { get; set; }
+}
+
+public class PatientDetailDto
+{
+    public Patient Patient { get; set; } = new();
+    public Doctor? Doctor { get; set; }
+    public Clinique? Clinique { get; set; }
+    public City? City { get; set; }
+    public List<Phone> Phones { get; set; } = new();
+    public List<Exam> Exams { get; set; } = new();
+}
+
+public class DoctorDetailDto
+{
+    public Doctor Doctor { get; set; } = new();
+    public Clinique? Clinique { get; set; }
+    public List<Patient> Patients { get; set; } = new();
+}
