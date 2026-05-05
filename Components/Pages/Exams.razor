@@ -10,9 +10,21 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-primary"><i class="bi bi-calendar-check me-2"></i>Manage Exams</h1>
-        <button class="btn btn-primary" @onclick="() => ShowForm()">
-            <i class="bi bi-plus-circle me-1"></i> Add New Exam
-        </button>
+        <div class="d-flex gap-2">
+            <select class="form-select" @bind="_selectedExamTypeId">
+                <option value="0">All Exam Types</option>
+                @if (_examTypes != null)
+                {
+                    @foreach (var et in _examTypes)
+                    {
+                        <option value="@et.Id">@et.Nom</option>
+                    }
+                }
+            </select>
+            <button class="btn btn-primary text-nowrap" @onclick="() => ShowForm()">
+                <i class="bi bi-plus-circle me-1"></i> Add New Exam
+            </button>
+        </div>
     </div>
 
     @if (_exams == null)
@@ -181,17 +193,23 @@
     private List<Exam>? _exams;
     private string _sortColumnExams = "Date";
     private bool _sortAscendingExams = false; // By default sort dates downwards (newest first)
+    private int _selectedExamTypeId = 0;
 
     private IEnumerable<Exam>? SortedExams
     {
         get
         {
             if (_exams == null) return null;
+            
+            var filtered = _selectedExamTypeId == 0 
+                ? _exams 
+                : _exams.Where(e => e.ExamTypeId == _selectedExamTypeId);
+
             if (_sortColumnExams == "Date")
-                return _sortAscendingExams ? _exams.OrderBy(e => e.DateExamen) : _exams.OrderByDescending(e => e.DateExamen);
+                return _sortAscendingExams ? filtered.OrderBy(e => e.DateExamen) : filtered.OrderByDescending(e => e.DateExamen);
             if (_sortColumnExams == "Type")
-                return _sortAscendingExams ? _exams.OrderBy(e => e.ExamTypeName) : _exams.OrderByDescending(e => e.ExamTypeName);
-            return _exams;
+                return _sortAscendingExams ? filtered.OrderBy(e => e.ExamTypeName) : filtered.OrderByDescending(e => e.ExamTypeName);
+            return filtered;
         }
     }
 

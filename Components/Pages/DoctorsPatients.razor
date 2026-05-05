@@ -31,9 +31,12 @@
         {
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3>Patients</h3>
-                <button class="btn btn-success" @onclick="() => ShowPatientForm()">
-                    <i class="bi bi-person-plus me-1"></i> Add Patient
-                </button>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Search patient name..." @bind="_searchQueryPatients" @bind:event="oninput" style="max-width: 300px;" />
+                    <button class="btn btn-success text-nowrap" @onclick="() => ShowPatientForm()">
+                        <i class="bi bi-person-plus me-1"></i> Add Patient
+                    </button>
+                </div>
             </div>
 
             @if (_patients == null)
@@ -87,9 +90,12 @@
         {
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3>Doctors</h3>
-                <button class="btn btn-info text-white" @onclick="() => ShowDoctorForm()">
-                    <i class="bi bi-person-plus-fill me-1"></i> Add Doctor
-                </button>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Search doctor name..." @bind="_searchQueryDoctors" @bind:event="oninput" style="max-width: 300px;" />
+                    <button class="btn btn-info text-white text-nowrap" @onclick="() => ShowDoctorForm()">
+                        <i class="bi bi-person-plus-fill me-1"></i> Add Doctor
+                    </button>
+                </div>
             </div>
 
             @if (_doctors == null)
@@ -359,15 +365,21 @@
 
     private string _sortColumnPatients = "Profession";
     private bool _sortAscendingPatients = true;
+    private string _searchQueryPatients = "";
 
     private IEnumerable<Patient>? SortedPatients
     {
         get
         {
             if (_patients == null) return null;
+
+            var filtered = string.IsNullOrWhiteSpace(_searchQueryPatients)
+                ? _patients
+                : _patients.Where(p => p.FullName.Contains(_searchQueryPatients, StringComparison.OrdinalIgnoreCase));
+
             if (_sortColumnPatients == "Profession")
-                return _sortAscendingPatients ? _patients.OrderBy(p => p.Profession) : _patients.OrderByDescending(p => p.Profession);
-            return _patients;
+                return _sortAscendingPatients ? filtered.OrderBy(p => p.Profession) : filtered.OrderByDescending(p => p.Profession);
+            return filtered;
         }
     }
 
@@ -384,15 +396,21 @@
 
     private string _sortColumnDoctors = "Licence";
     private bool _sortAscendingDoctors = true;
+    private string _searchQueryDoctors = "";
 
     private IEnumerable<Doctor>? SortedDoctors
     {
         get
         {
             if (_doctors == null) return null;
+
+            var filtered = string.IsNullOrWhiteSpace(_searchQueryDoctors)
+                ? _doctors
+                : _doctors.Where(d => d.NomComplet.Contains(_searchQueryDoctors, StringComparison.OrdinalIgnoreCase));
+
             if (_sortColumnDoctors == "Licence")
-                return _sortAscendingDoctors ? _doctors.OrderBy(d => d.Licence) : _doctors.OrderByDescending(d => d.Licence);
-            return _doctors;
+                return _sortAscendingDoctors ? filtered.OrderBy(d => d.Licence) : filtered.OrderByDescending(d => d.Licence);
+            return filtered;
         }
     }
 
